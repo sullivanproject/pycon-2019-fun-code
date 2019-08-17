@@ -2,6 +2,7 @@ from copy import deepcopy, copy
 import random
 import sys
 import traceback
+import os
 
 
 class CommandError(SyntaxError): pass
@@ -49,8 +50,14 @@ def read_code(filename):
     return org_code
 
 
-def write_code(new_code, filename):
-    new_code = ''.join(new_code).encode('utf-8')
+def write_code(new_code, filename, unit):
+    if unit == 'line':
+        # If unit is line, new_code's elements does not have new line symbol
+        join_token = os.linesep
+    else:
+        # If unit is char, new line symbol is element of new_code
+        join_token = ''
+    new_code = join_token.join(new_code).encode('utf-8')
     wp = open(filename, 'wb')
     wp.write(new_code)
     wp.close()
@@ -60,7 +67,18 @@ def make_sequence_from_source(org_source, unit):
     if unit == 'char':
         org_source = list(org_source)
     elif unit == 'line':
-        sep = '\r\n' if '\r\n' in org_source else '\n'
+        if '\r\n' in org_source:
+            # For windows or ms-dos
+            sep = '\r\n'
+        elif '\n' in org_source:
+            # For linux ox
+            sep = '\n'
+        elif '\r' in org_source:
+            # For unix or osx or somethings..
+            sep = '\r'
+        else:
+            # I don't know what did I support any new line symbol
+            raise SyntaxError('Not supported new line symbol.')
         org_source = org_source.split(sep)
     else:
         raise CommandError('Wrong command!!')
@@ -90,7 +108,7 @@ def main():
     # 만들어진 코드 리스트 단위를 주어진 방법으로 바꾼다.
     code = do_func(code, config['type'])
     # 다시 자신의 소스코드에 덮어씌운다.
-    write_code(code, config['this_file'])
+    write_code(code, config['this_file'], config['unit'])
 
 
 if __name__ == "__main__":
