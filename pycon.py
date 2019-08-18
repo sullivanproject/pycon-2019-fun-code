@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 # Sorry, I don't know Korean language
 # I'm pretty sure that the metaprogramming example is useless  and people shouldn't write like this
-# The example can run normally without runtime example
+# The example can run normally without runtime example.
 
 _ = type('', (), dict(__getattr__=lambda s, _: s))()
 _.d = dataclass
